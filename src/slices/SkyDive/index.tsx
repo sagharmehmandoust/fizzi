@@ -1,15 +1,14 @@
 "use client";
 
-import { Content } from "@prismicio/client";
-import { SliceComponentProps } from "@prismicio/react";
+import type { SkyDiveSlice } from "@/content";
 
 import { Bounded } from "@/components/Bounded";
 import Scene from "./Scene";
 import { View } from "@react-three/drei";
-/**
- * Props for `SkyDive`.
- */
-export type SkyDiveProps = SliceComponentProps<Content.SkyDiveSlice>;
+
+export type SkyDiveProps = {
+  slice: SkyDiveSlice;
+};
 
 /**
  * Component for "SkyDive" Slices.
@@ -18,7 +17,7 @@ const SkyDive = ({ slice }: SkyDiveProps): JSX.Element => {
   return (
     <Bounded
       data-slice-type={slice.slice_type}
-      data-slice-variation={slice.variation}
+      data-slice-variation="default"
       className="skydive h-screen"
     >
       <h2 className="sr-only">{slice.primary.sentence}</h2>

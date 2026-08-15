@@ -1,8 +1,6 @@
 "use client";
 
-import { asText, Content } from "@prismicio/client";
-import { PrismicNextImage } from "@prismicio/next";
-import { PrismicRichText, SliceComponentProps } from "@prismicio/react";
+import { asText, RichText } from "@/lib/richText";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -15,13 +13,13 @@ import Scene from "./Scene";
 import { Bubbles } from "./Bubbles";
 import { useStore } from "@/hooks/useStore";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import type { HeroSlice } from "@/content";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-/**
- * Props for `Hero`.
- */
-export type HeroProps = SliceComponentProps<Content.HeroSlice>;
+export type HeroProps = {
+  slice: HeroSlice;
+};
 
 /**
  * Component for "Hero" Slices.
@@ -104,7 +102,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
   return (
     <Bounded
       data-slice-type={slice.slice_type}
-      data-slice-variation={slice.variation}
+      data-slice-variation="default"
       className="hero opacity-0"
     >
       {isDesktop && (
@@ -125,10 +123,10 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
               />
             </h1>
             <div className="hero-subheading mt-12 text-5xl font-semibold text-sky-950 lg:text-6xl">
-              <PrismicRichText field={slice.primary.subheading} />
+              <RichText field={slice.primary.subheading} />
             </div>
             <div className="hero-body text-2xl font-normal text-sky-950">
-              <PrismicRichText field={slice.primary.body} />
+              <RichText field={slice.primary.body} />
             </div>
             <Button
               buttonLink={slice.primary.button_link}
@@ -139,16 +137,17 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
         </div>
 
         <div className="text-side relative z-[80] grid h-screen items-center gap-4 md:grid-cols-2">
-          <PrismicNextImage
+          <img
             className="w-full md:hidden"
-            field={slice.primary.cans_image}
+            src={slice.primary.cans_image.src}
+            alt={slice.primary.cans_image.alt ?? ""}
           />
           <div>
             <h2 className="text-side-heading text-balance text-6xl font-black uppercase text-sky-950 lg:text-8xl">
               <TextSplitter text={asText(slice.primary.second_heading)} />
             </h2>
             <div className="text-side-body mt-4 max-w-xl text-balance text-xl font-normal text-sky-950">
-              <PrismicRichText field={slice.primary.second_body} />
+              <RichText field={slice.primary.second_body} />
             </div>
           </div>
         </div>
