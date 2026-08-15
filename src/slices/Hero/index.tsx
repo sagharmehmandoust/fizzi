@@ -4,6 +4,7 @@ import { asText, RichText } from "@/lib/richText";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useEffect, useState } from "react";
 import { View } from "@react-three/drei";
 
 import { Bounded } from "@/components/Bounded";
@@ -27,10 +28,20 @@ export type HeroProps = {
 const Hero = ({ slice }: HeroProps): JSX.Element => {
   const ready = useStore((state) => state.ready);
   const isDesktop = useMediaQuery("(min-width: 768px)", true);
+  const [sceneReady, setSceneReady] = useState(ready);
+
+  useEffect(() => {
+    if (ready) {
+      setSceneReady(true);
+      return;
+    }
+    const timeout = setTimeout(() => setSceneReady(true), 2000);
+    return () => clearTimeout(timeout);
+  }, [ready]);
 
   useGSAP(
     () => {
-      if (!ready && isDesktop) return;
+      if (!sceneReady && isDesktop) return;
 
       const introTl = gsap.timeline();
 
@@ -96,7 +107,7 @@ const Hero = ({ slice }: HeroProps): JSX.Element => {
           opacity: 0,
         });
     },
-    { dependencies: [ready, isDesktop] },
+    { dependencies: [sceneReady, isDesktop] },
   );
 
   return (

@@ -1,8 +1,8 @@
 "use client";
 
 import type { Flavor } from "@/content";
-import { Cloud, Clouds, Environment, Text } from "@react-three/drei";
-import { useRef } from "react";
+import { Cloud, Clouds, Environment } from "@react-three/drei";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -174,22 +174,79 @@ function ThreeText({
 }) {
   const words = sentence.toUpperCase().split(" ");
 
-  const material = new THREE.MeshLambertMaterial();
   const isDesktop = useMediaQuery("(min-width: 950px)", true);
 
   return words.map((word: string, wordIndex: number) => (
-    <Text
+    <WordMesh
       key={`${wordIndex}-${word}`}
-      scale={isDesktop ? 1 : 0.5}
+      word={word}
       color={color}
-      material={material}
-      font="/fonts/Alpino-Variable.woff"
-      fontWeight={900}
-      anchorX={"center"}
-      anchorY={"middle"}
-      characters="ABCDEFGHIJKLMNOPQRSTUVWXYZ!,.?'"
-    >
-      {word}
-    </Text>
+      scale={isDesktop ? 1 : 0.5}
+    />
   ));
+}
+
+const FONT_SIZE = 96;
+
+function WordMesh({
+  word,
+  color,
+  scale,
+}: {
+  word: string;
+  color: string;
+  scale: number;
+}) {
+  const texture = useWordTexture(word, color);
+
+  return (
+    <mesh scale={scale} visible={!!texture}>
+      <planeGeometry args={[texture?.aspect ?? 1, 1]} />
+      <meshBasicMaterial map={texture?.texture} transparent toneMapped={false} />
+    </mesh>
+  );
+}
+
+function useWordTexture(word: string, color: string) {
+  const [texture, setTexture] = useState<{
+    texture: THREE.CanvasTexture;
+    aspect: number;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    let lastTexture: THREE.CanvasTexture | null = null;
+
+    const draw = () => {
+      if (cancelled) return;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const font = `900 ${FONT_SIZE}px "Alpino", sans-serif`;
+      ctx.font = font;
+      const width = Math.ceil(ctx.measureText(word).width) + FONT_SIZE * 0.5;
+      const height = Math.ceil(FONT_SIZE * 1.25);
+      canvas.width = width;
+      canvas.height = height;
+      ctx.font = font;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = color;
+      ctx.fillText(word, width / 2, height / 2);
+      lastTexture?.dispose();
+      const canvasTexture = new THREE.CanvasTexture(canvas);
+      canvasTexture.colorSpace = THREE.SRGBColorSpace;
+      lastTexture = canvasTexture;
+      setTexture({ texture: canvasTexture, aspect: width / height });
+    };
+
+    draw();
+    document.fonts.load(`900 ${FONT_SIZE}px "Alpino"`, word).then(draw).catch(() => {});
+
+    return () => {
+      cancelled = true;
+      lastTexture?.dispose();
+    };
+  }, [word, color]);
+
+  return texture;
 }
