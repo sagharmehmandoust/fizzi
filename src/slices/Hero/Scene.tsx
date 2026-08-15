@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Environment, OrbitControls } from "@react-three/drei";
 import { Group } from "three";
 import gsap from "gsap";
@@ -29,6 +29,18 @@ export default function Scene({}: Props) {
   const groupRef = useRef<Group>(null);
 
   const FLOAT_SPEED = 1.5;
+
+  const [groupScale, setGroupScale] = useState(1);
+
+  useEffect(() => {
+    const update = () => {
+      const aspect = window.innerWidth / window.innerHeight;
+      setGroupScale(aspect < 1 ? aspect : 1);
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   useGSAP(() => {
     if (
@@ -114,7 +126,7 @@ export default function Scene({}: Props) {
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} scale={groupScale}>
       <group ref={can1GroupRef}>
         <FloatingCan
           ref={can1Ref}
