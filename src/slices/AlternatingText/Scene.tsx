@@ -20,6 +20,7 @@ export default function Scene({}: Props) {
 
   const bgColors = ["#FFA6B5", "#E9CFF6", "#CBEF9A"];
 
+  /* check for removing slices everywhere*/
   useGSAP(
     () => {
       if (!canRef.current) return;
